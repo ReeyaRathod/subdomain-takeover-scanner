@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subdomain Takeover Scanner</title>
+    <style>
+        body { background-color: #07090e; color: #c9d1d9; font-family: 'Segoe UI', monospace; margin: 0; padding: 40px 20px; display: flex; justify-content: center; }
+        .wrapper { width: 850px; }
+        .header-box { background: #0d1117; border: 1px solid #ff2222; border-radius: 10px; padding: 25px; box-shadow: 0 0 25px rgba(255, 34, 34, 0.25); text-align: center; margin-bottom: 25px; }
+        h1 { color: #ff2222; margin: 0 0 10px 0; font-size: 26px; letter-spacing: 2px; }
+        p.subtitle { color: #8b949e; font-size: 13px; margin: 0; }
+        
+        .form-box { display: flex; gap: 10px; margin-top: 20px; }
+        input[type="text"] { flex: 1; padding: 12px 15px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #fff; font-size: 14px; outline: none; }
+        input[type="text"]:focus { border-color: #ff2222; }
+        button { background: #ff2222; color: #fff; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        button:hover { background: #d91b1b; }
+
+        .results-box { background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 12px; color: #8b949e; font-size: 12px; border-bottom: 1px solid #30363d; text-transform: uppercase; }
+        td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #21262d; }
+        
+        .badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; letter-spacing: 0.5px; }
+        .poc-box { background: #161b22; border-left: 3px solid #ff2222; padding: 10px 15px; margin-top: 15px; border-radius: 0 6px 6px 0; font-size: 12px; color: #8b949e; }
+        .poc-title { color: #ff2222; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header-box">
+            <h1>🎯 SUBDOMAIN TAKEOVER SCANNER</h1>
+            <p class="subtitle">Identify dangling CNAME DNS misconfigurations vulnerable to cloud hijacking[span_2](start_span)[span_2](end_span).</p>
+            
+            <form method="POST" class="form-box">
+                <input type="text" name="domain" required placeholder="Enter target domain (e.g., example.com)" value="{{ domain }}">
+                <button type="submit">Start Scan</button>
+            </form>
+        </div>
+
+        {% if results %}
+        <div class="results-box">
+            <h3 style="margin-top: 0; color: #c9d1d9;">Target Enumeration Results</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subdomain</th>
+                        <th>CNAME Record</th>
+                        <th>Service</th>
+                        <th>Vulnerability Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                    <tr>
+                        <td style="font-weight: bold;">{{ row.subdomain }}</td>
+                        <td style="color: #58a6ff;">{{ row.cname }}</td>
+                        <td>{{ row.service }}</td>
+                        <td>
+                            <span class="badge" style="background-color: {{ row.color }}22; color: {{ row.color }}; border: 1px solid {{ row.color }};">
+                                {{ row.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% for row in results %}
+                {% if row.status == 'TAKEOVER POSSIBLE' %}
+                <div class="poc-box">
+                    <div class="poc-title">⚠️ Proof of Concept (POC) Remediation & Exploitation Guide: {{ row.subdomain }}</div>
+                    <div><strong>Detected Provider:</strong> {{ row.service }}</div>
+                    <div><strong>Action Plan:</strong> {{ row.poc }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
